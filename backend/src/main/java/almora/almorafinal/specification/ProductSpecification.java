@@ -100,6 +100,17 @@ public class ProductSpecification {
                 );
             }
 
+            if (request.getSubCategory() != null
+                    && !request.getSubCategory().isBlank()) {
+
+                predicates.add(
+                        criteriaBuilder.equal(
+                                root.get("subCategory"),
+                                request.getSubCategory()
+                        )
+                );
+            }
+
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };

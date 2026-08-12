@@ -67,23 +67,7 @@ public class ProductService {
 
     }
 
-    public List<ProductDTO> getByCategory(Product.Category category) {
-        return repo.findByCategory(category).stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<ProductDTO> getByCategoryAndSubCategory(Product.Category category, String subCategory) {
-        return repo.findByCategoryAndSubCategory(category, subCategory).stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<ProductDTO> search(String keyword) {
-        return repo.findByNameContainingIgnoreCase(keyword).stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    }
+    
 
     public ProductDTO upDateProduct(Long id , Product upDatedProduct){
         Product existProduct  = repo.findById(id)

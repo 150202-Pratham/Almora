@@ -31,30 +31,13 @@ public class ProductController {
 
     // ---------- Get All Products ----------
     @GetMapping
-    public ResponseEntity<Page<ProductDTO>> getAll(
-            @RequestParam(defaultValue = "0") int page ,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) Product.Category category ,
-            @RequestParam(required = false ) String subCategory ,
-            @RequestParam(required = false) String brand ,
-            @RequestParam(required = false) String color ,
-            @RequestParam(required = false)  Double minPrice,
-            @RequestParam(required = false) Double maxPrice ,
-            @RequestParam(required = false) String keyword
-    ) {
-        ProductFilterRequest request = ProductFilterRequest.builder()
-                .category(category)
-                .subCategory(subCategory)
-                .brand(brand)
-                .color(color)
-                .minPrice(minPrice)
-                .maxPrice(maxPrice)
-                .keyword(keyword)
-                .build();
+    public ResponseEntity<Page<ProductDTO>> getAllProducts(
+            @ModelAttribute ProductFilterRequest request,
+            Pageable pageable) {
 
-        Pageable pageable = PageRequest.of(page, size);
-
-        return ResponseEntity.ok(service.getAllProducts(request ,pageable));
+        return ResponseEntity.ok(
+                service.getAllProducts(request, pageable)
+        );
     }
 
     // ---------- Get Product by ID ----------
@@ -63,27 +46,7 @@ public class ProductController {
         return ResponseEntity.ok(service.getProductById(id)) ;
 
     }
-
-    // ---------- Filter by Category ----------
-    @GetMapping(params = "category")
-    public ResponseEntity<List<ProductDTO>> getByCategory(@RequestParam Product.Category category) {
-        return ResponseEntity.ok(service.getByCategory(category));
-    }
-
-    // ---------- Filter by Category + SubCategory ----------
-    @GetMapping("/category/{category}/subcategory/{subCategory}")
-    public ResponseEntity<List<ProductDTO>> getByCategoryAndSubCategory(
-            @PathVariable Product.Category category,
-            @PathVariable String subCategory
-    ) {
-        return ResponseEntity.ok(service.getByCategoryAndSubCategory(category, subCategory));
-    }
-
-    // ---------- Search by Name ----------
-    @GetMapping("/search")
-    public ResponseEntity<List<ProductDTO>> search(@RequestParam String keyword) {
-        return ResponseEntity.ok(service.search(keyword));
-    }
+    
     //-----------Update Product -------------
     @PutMapping("/{id}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody Product updatedProduct) {
