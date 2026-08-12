@@ -1,528 +1,577 @@
-#  Almora 2.0 – Production-Grade Scalable E-Commerce Platform
-
-<div align="center">
-
-![Java](https://img.shields.io/badge/Java-21-orange)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen)
-![React](https://img.shields.io/badge/React-19-blue)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-blue)
-![Status](https://img.shields.io/badge/Status-Active-success)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
-
-**Building a Production-Ready Scalable Commerce Backend with Modern Backend Engineering Principles**
-
-</div>
-
----
-
-# 📖 Overview
-
-**Almora** is a modern fashion-focused e-commerce platform built to explore **real-world backend engineering practices** instead of just implementing CRUD operations.
-
-The project is evolving from a traditional Spring Boot application into a **production-grade scalable commerce platform** by gradually introducing industry-standard backend concepts such as:
-
-- Performance Optimization
-- Dynamic Query Engine
-- Redis Caching
-- Object Storage (MinIO)
-- Event-Driven Architecture
-- RabbitMQ
-- Docker
-- Horizontal Scaling
-- Nginx Load Balancing
-- Production Deployment
-
-This repository documents not only the implementation but also the **engineering decisions** behind every architectural improvement.
-
----
-
-# 🎯 Vision
-
-The objective of Almora is **not** to clone Amazon or Flipkart.
-
-Instead, the goal is to understand:
-
-- How production systems evolve
-- Why architectural decisions matter
-- How scalability is introduced incrementally
-- How backend systems are designed for millions of users
-
-Every feature added to Almora solves a **real engineering problem** rather than simply introducing a new technology.
-
----
-
-# 🏗️ Current Architecture
-
-```text
-                React + Vite
-
-                      │
-
-                REST APIs
-
-                      │
-
-               Spring Boot
-
-                      │
-
-────────────────────────────────────
-
-Controllers
-
-Services
-
-Repositories
-
-DTOs
-
-Security
-
-────────────────────────────────────
-
-             Spring Data JPA
-
-                      │
-
-                   MySQL
-```
-
----
-
-# 🚀 Target Production Architecture
-
-```text
-                    React + Vite
-
-                          │
-
-                       Nginx
-
-                          │
-
-        ┌─────────────────┼─────────────────┐
-
-        │                 │                 │
-
- Spring Boot #1    Spring Boot #2    Spring Boot #3
-
-        │                 │                 │
-
-        └─────────────────┼─────────────────┘
-
-                          │
-
-                Business Services
-
-────────────────────────────────────────────────────────
-
-Authentication
-
-Catalog
-
-Cart
-
-Orders
-
-Payments
-
-Reviews
-
-Notifications
-
-Storage
-
-────────────────────────────────────────────────────────
-
-Redis
-
-RabbitMQ
-
-MinIO
-
-MySQL
-
-Docker
-
-Monitoring
-
-```
-
----
-
-# ✨ Features
-
-## Authentication
-
-- JWT Authentication
-- Login & Registration
-- Role-Based Authorization
-- Protected APIs
-
----
-
-## Product Catalog
-
-- Product Management
-- Categories
-- Sub Categories
-- Product Search
-- Reviews
-- Ratings
-
----
-
-## Cart
-
-- Add to Cart
-- Remove Items
-- Quantity Management
-
----
-
-## Orders
-
-- Place Orders
-- Order History
-- Order Tracking (Upcoming)
-
----
-
-## Reviews
-
-- Product Reviews
-- Product Ratings
-- Rating Aggregation
-
----
-
-# 🧠 Backend Engineering Roadmap
-
-| Feature | Status |
-|----------|--------|
-| Layered Architecture | ✅ |
-| DTO Pattern | ✅ |
-| JWT Authentication | ✅ |
-| Pagination | ✅ |
-| Dynamic Query Engine | 🚧 |
-| JPA Specifications | 🚧 |
-| Sorting | ⏳ |
-| Dynamic Filtering | ⏳ |
-| DTO Projection | ⏳ |
-| Logging | ⏳ |
-| Global Exception Handling | ⏳ |
-| Redis Cache | ⏳ |
-| Cache Invalidation | ⏳ |
-| MinIO Integration | ⏳ |
-| RabbitMQ | ⏳ |
-| Docker | ⏳ |
-| Horizontal Scaling | ⏳ |
-| Nginx | ⏳ |
-| Monitoring | ⏳ |
-| Cloud Deployment | ⏳ |
-
----
-
-# ⚙️ Tech Stack
-
-## Backend
-
-- Java 21
-- Spring Boot
-- Spring Security
-- Spring Data JPA
-- Hibernate
-- JWT
-- Lombok
-
----
-
-## Database
-
-- MySQL
-
----
-
-## Frontend
-
-- React
-- Vite
-- Tailwind CSS
-
----
-
-## Future Technologies
-
-- Redis
-- RabbitMQ
-- MinIO
-- Docker
-- Nginx
-- Prometheus
-- Grafana
-
----
-
-# 📂 Project Structure
-
-```text
-almora
-
-├── Controller
-
-├── Services
-
-├── Repository
-
-├── DTO
-
-├── Entities
-
-├── Security
-
-├── Config
-
-├── Utils
-
-└── Exceptions (Upcoming)
-```
-
----
-
-# 🚀 Engineering Journey
-
-This repository is maintained like a real software engineering project.
-
-Every sprint includes:
-
-- Architecture Design
-- Feature Planning
-- Implementation
-- Performance Analysis
-- Documentation
-- Benchmarks
-- GitHub Updates
-
----
-
-# 📅 Sprint Progress
-
-## Sprint 0 — Architecture Audit ✅
-
-Completed
-
-- Backend Architecture Review
-- Product Module Audit
-- Repository Review
-- Service Layer Review
-- Scalability Planning
-- Technology Roadmap
-- Production Architecture Design
-
----
-
-## Sprint 1 — Performance Engineering 🚧
-
-Completed
-
-- Server-side Pagination
-- Product Entity Review
-- Dynamic Query Engine Design
-- JPA Specification Setup
-- ProductFilterRequest
-- ProductSpecification
-- Category Filter
-- Brand Filter
-- Color Filter
-- Price Range Filter
-- Keyword Search Filter
-
-In Progress
-
-- Controller Integration
-- Service Integration
-- Dynamic Sorting
-
-Upcoming
-
-- DTO Projection
-- Logging
-- Global Exception Handling
-- Benchmark Testing
-
----
-
-# 📈 Performance Strategy
-
-Current Improvements
-
-✅ Pagination
-
-Upcoming
-
-- DTO Projection
-- SQL Optimization
-- Redis Cache
-- Cache Invalidation
-
-Future
-
-- Multi-Level Caching
-- Distributed Caching
-- CDN
-
----
-
-# 🧩 Scalability Strategy
-
-Current
-
-```text
-Client
-
-↓
-
-Spring Boot
-
-↓
-
+# Almora --- E-Commerce Backend
+
+> A Java Spring Boot e-commerce backend focused on backend engineering,
+> database optimization, scalable API design, and production-oriented
+> architecture.
+
+## Project Overview
+
+Almora is an e-commerce platform being evolved step-by-step to learn and
+implement real backend engineering concepts.
+
+The project currently provides:
+
+-   Product CRUD
+-   Dynamic product filtering
+-   Keyword search
+-   Price-range filtering
+-   Pagination
+-   Dynamic sorting
+-   Product reviews and ratings
+-   Product images and sizes
+-   MySQL persistence
+-   MinIO integration direction
+-   Performance analysis and optimization roadmap
+
+## Current Architecture
+
+``` text
+Client / Frontend
+       |
+       v
+ProductController
+       |
+       v
+ProductService
+       |
+       v
+ProductSpecification
+(Dynamic Query Engine)
+       |
+       v
+ProductRepository
+       |
+       v
+Hibernate / JPA
+       |
+       v
 MySQL
 ```
 
-Future
+## Technology Stack
 
-```text
-Client
+### Backend
 
-↓
+-   Java
+-   Spring Boot
+-   Spring MVC
+-   Spring Data JPA
+-   Hibernate
+-   Jakarta Validation
+-   Lombok
 
-Nginx
+### Database
 
-↓
+-   MySQL
 
-Spring Boot Instances
+### Storage
 
-↓
+-   MinIO
 
-Redis
+### Development
 
-↓
+-   IntelliJ IDEA
+-   Maven
+-   Git
+-   GitHub
 
-RabbitMQ
+# Completed Features
 
-↓
+## Product CRUD
 
-MinIO
+``` text
+POST   /api/products
+GET    /api/products
+GET    /api/products/{id}
+PUT    /api/products/{id}
+DELETE /api/products/{id}
+```
 
-↓
+Products contain:
 
+-   Name
+-   Category
+-   Sub-category
+-   Brand
+-   Sizes
+-   Color
+-   Price
+-   Stock
+-   Description
+-   Image URLs
+-   Active status
+-   Average rating
+-   Reviews
+
+## Dynamic Product Query Engine
+
+The Product API now supports:
+
+``` text
+Category
+SubCategory
+Brand
+Color
+Minimum Price
+Maximum Price
+Keyword
+Pagination
+Sorting
+```
+
+Example:
+
+``` http
+GET /api/products?category=MEN&brand=Levis&minPrice=2000&maxPrice=3000&page=0&size=20&sort=price,asc
+```
+
+### Query Flow
+
+``` text
+HTTP Request
+     |
+ProductFilterRequest
+     |
+ProductSpecification
+     |
+CriteriaBuilder Predicates
+     |
+ProductRepository
+     |
+Hibernate
+     |
 MySQL
 ```
 
----
+This allows multiple filters to be combined without creating a separate
+repository method for every combination.
 
-# 🎯 Engineering Principles
+## Keyword Search
 
-Almora follows these principles:
+Keyword search is implemented against the product name.
 
-- Clean Architecture
-- Separation of Concerns
-- SOLID Principles
-- Domain-Oriented Design
-- Stateless Backend
-- Performance First
-- Incremental Scalability
-- Production-Ready APIs
+Conceptually:
 
----
+``` sql
+WHERE LOWER(name) LIKE '%keyword%'
+```
 
-# 📌 Architecture Decision Records (ADR)
+Example:
 
-Every major architectural decision is documented.
+``` http
+GET /api/products?keyword=jeans&page=0&size=20
+```
 
-Examples
+## Price Range Filtering
 
-- Why Pagination?
-- Why Redis?
-- Why MinIO?
-- Why RabbitMQ?
-- Why Docker?
-- Why Nginx?
+Supports:
 
-These documents explain not only **what** was implemented but **why** the decision was made.
+``` text
+minPrice
+maxPrice
+```
 
----
+Example:
 
-# 📊 Current Metrics
+``` http
+GET /api/products?minPrice=1000&maxPrice=3000
+```
 
-| Metric | Value |
-|---------|-------|
-| REST APIs | Growing |
-| Modules | Authentication, Products, Reviews, Orders |
-| Database | MySQL |
-| Authentication | JWT |
-| Architecture | Layered |
-| Pagination | ✅ |
-| Dynamic Query Engine | 🚧 |
-| Redis | Planned |
-| RabbitMQ | Planned |
-| Docker | Planned |
+## Pagination
 
----
+Example:
 
-# 🎓 Learning Objectives
+``` http
+GET /api/products?page=0&size=20
+```
 
-This project is built to understand:
+The API returns page metadata such as:
 
-- Production Backend Engineering
-- API Design
-- Scalable Architecture
-- Performance Optimization
-- Distributed Systems
-- Event-Driven Architecture
-- Object Storage
-- Caching
-- Deployment
-- DevOps Fundamentals
+-   Current page
+-   Page size
+-   Total elements
+-   Total pages
+-   First/last page information
+-   Product content
 
----
+## Dynamic Sorting
 
-# 🚀 Future Roadmap
+Sorting is handled through Spring Data `Pageable`.
 
-- Advanced Product Search
-- Recommendation Engine
-- Wishlist
-- Payment Gateway
-- Order Tracking
-- Inventory Reservation
-- Async Email Service
-- Object Storage
-- Redis Cache
-- Event-Driven Orders
-- Docker Compose
-- Kubernetes (Future)
-- Cloud Deployment
+Example:
 
----
+``` http
+GET /api/products?page=0&size=20&sort=price,asc
+```
 
-# 🤝 Contributing
+Other examples:
 
-Contributions, discussions, and suggestions are welcome.
+``` text
+sort=price,desc
+sort=name,asc
+sort=stock,desc
+```
 
-Feel free to fork the repository and open pull requests for improvements.
+The Hibernate SQL now generates `ORDER BY` when sorting is requested.
 
----
+# Development Product Dataset
 
-# 📜 License
+A development-only `ProductSeeder` was added using:
 
-This project is released under the MIT License.
+``` java
+@Component
+@Profile("dev")
+public class ProductSeeder implements CommandLineRunner
+```
 
----
+The seeder checks the current product count and generates products until
+the database reaches:
 
-<div align="center">
+``` text
+500 products
+```
 
-## ⭐ Building Software Like Production, Not Like Tutorials.
+The generated dataset contains approximately:
 
-**"Every feature solves an engineering problem before introducing a technology."**
+``` text
+MEN   -> 250
+WOMEN -> 250
+```
 
-</div>
+The data varies across:
+
+-   Categories
+-   Sub-categories
+-   Brands
+-   Colors
+-   Prices
+-   Stock
+-   Sizes
+
+The seeder is restricted to the `dev` profile so development test data
+is not automatically inserted into production.
+
+# Performance Engineering
+
+After completing the Query Engine, performance testing was started using
+the 500-product dataset.
+
+Test request:
+
+``` http
+GET /api/products?page=0&size=20
+```
+
+The Hibernate logs showed that the main product query itself is not the
+primary bottleneck. Additional database queries are being executed for
+each returned product.
+
+# N+1 Query Problem Identified
+
+For a page containing 20 products, the current implementation performs
+repeated queries for:
+
+``` text
+Image URLs
+Sizes
+Average Rating
+Review Count
+```
+
+Current baseline:
+
+``` text
+20 products
+
+1  Product query
+1  Count query
+20 Image queries
+20 Size queries
+20 Average-rating queries
+20 Review-count queries
+
+≈ 82 SQL executions
+```
+
+The Product service currently calculates rating information per product:
+
+``` java
+Double avgRating =
+        reviewService.getAverageRating(product.getId());
+
+Long reviewCount =
+        reviewService.getReviewCount(product.getId());
+```
+
+This causes individual aggregate queries for each product.
+
+## Performance Baseline
+
+``` text
+Dataset:
+500 products
+
+Request:
+GET /api/products?page=0&size=20
+
+Page Size:
+20
+
+Approximate SQL Executions:
+82
+```
+
+The purpose of this baseline is to measure the system before
+optimization.
+
+The engineering process is:
+
+``` text
+Measure
+   |
+Identify Bottleneck
+   |
+Optimize
+   |
+Measure Again
+```
+
+# Current Optimization Target
+
+The first optimization target is the review system.
+
+### Current
+
+``` text
+20 products
+   |
+20 AVG queries
++
+20 COUNT queries
+```
+
+### Target
+
+Replace per-product review queries with bulk aggregation using:
+
+``` sql
+GROUP BY product_id
+```
+
+The goal is to retrieve rating information for the whole page with far
+fewer database queries.
+
+After that, image and size collection loading will be optimized.
+
+# Scalability Roadmap
+
+## Phase 1 --- Product Query Engine
+
+``` text
+DONE  Dynamic Filtering
+DONE  Keyword Search
+DONE  Price Range
+DONE  Pagination
+DONE  Sorting
+DONE  Combined Queries
+```
+
+## Phase 2 --- Database Performance
+
+``` text
+IN PROGRESS  N+1 Query Detection
+TODO         Bulk Review Aggregation
+TODO         Optimize Image Collection Loading
+TODO         Optimize Size Collection Loading
+TODO         DTO Projections where appropriate
+TODO         Database Indexing
+TODO         Performance comparison
+```
+
+## Phase 3 --- Caching
+
+``` text
+TODO Identify cacheable product queries
+TODO Redis
+TODO Cache-aside pattern
+TODO Cache invalidation
+TODO Measure cache hit/miss performance
+```
+
+## Phase 4 --- Media Storage
+
+``` text
+TODO MinIO integration refinement
+TODO Object storage architecture
+TODO Image upload optimization
+TODO Separate application data from media storage
+```
+
+## Phase 5 --- Async Processing
+
+Potential areas:
+
+``` text
+TODO Background workers
+TODO Event-driven operations
+TODO RabbitMQ / Kafka where justified
+TODO Email processing
+TODO Order processing workflows
+```
+
+## Phase 6 --- Deployment & Infrastructure
+
+Potential areas:
+
+``` text
+TODO Docker
+TODO Reverse Proxy
+TODO Nginx
+TODO Production configuration
+TODO Horizontal scaling
+TODO Monitoring
+TODO Load testing
+```
+
+> Technologies will be introduced when there is a clear engineering
+> reason to use them, rather than only for demonstration.
+
+# Engineering Philosophy
+
+Almora is a learning-oriented backend engineering project.
+
+The objective is not:
+
+``` text
+Add as many technologies as possible.
+```
+
+The objective is:
+
+``` text
+Problem
+   |
+Understand
+   |
+Measure
+   |
+Design
+   |
+Implement
+   |
+Benchmark
+   |
+Optimize
+```
+
+For example:
+
+``` text
+N+1 Queries
+     |
+Measure SQL executions
+     |
+Bulk aggregation
+     |
+Compare results
+```
+
+This makes architectural decisions explainable during technical
+interviews and project evaluations.
+
+# Today's Progress --- 13 August 2026
+
+Today's work moved Almora from feature development into performance
+engineering.
+
+## Completed Today
+
+``` text
+DONE Completed Dynamic Query Engine
+DONE Verified pagination
+DONE Verified filtering
+DONE Verified keyword search
+DONE Verified price range filtering
+DONE Verified dynamic sorting
+DONE Verified ORDER BY generation
+DONE Added development Product Seeder
+DONE Generated 500 products
+DONE Tested Product API with 20-item pagination
+DONE Started SQL performance analysis
+DONE Identified N+1-style query behavior
+DONE Established initial performance baseline
+```
+
+## Current Baseline
+
+``` text
+500 products
+20 products/page
+≈ 82 SQL executions
+```
+
+## Next Session
+
+``` text
+1. Optimize review aggregation
+2. Reduce AVG + COUNT queries
+3. Re-run the same API request
+4. Compare SQL query count
+5. Optimize image and size loading
+6. Establish a new performance baseline
+```
+
+# Current Project Status
+
+``` text
+Product CRUD              ████████████████████ 100%
+Dynamic Query Engine      ████████████████████ 100%
+Pagination                ████████████████████ 100%
+Sorting                   ████████████████████ 100%
+Filtering                 ████████████████████ 100%
+Keyword Search            ████████████████████ 100%
+
+Performance Engineering   ████░░░░░░░░░░░░░░░░ 20%
+N+1 Optimization          ░░░░░░░░░░░░░░░░░░░░ 0%
+Database Indexing          ░░░░░░░░░░░░░░░░░░░░ 0%
+Redis                      ░░░░░░░░░░░░░░░░░░░░ 0%
+Async Processing           ░░░░░░░░░░░░░░░░░░░░ 0%
+Docker/Deployment          ░░░░░░░░░░░░░░░░░░░░ 0%
+```
+
+# Immediate Next Goal
+
+> Reduce the number of SQL queries generated while returning a paginated
+> product listing.
+
+Current:
+
+``` text
+20 Products
+≈ 82 SQL executions
+```
+
+Target:
+
+``` text
+20 Products
+-> significantly fewer SQL executions
+```
+
+The improvement will be measured rather than assumed.
+
+# Project Status
+
+``` text
+Project:          Almora
+Type:             E-Commerce Platform
+Backend:          Java + Spring Boot
+Database:         MySQL
+Current Dataset:  500 development products
+Current Focus:    Backend Performance & Scalability
+AI Integration:   Not currently planned for this phase
+```
+
+## Development Principle
+
+> Build it. Measure it. Find the bottleneck. Fix it. Measure again.
