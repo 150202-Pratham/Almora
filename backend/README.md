@@ -1,183 +1,244 @@
-# Almora --- E-Commerce Backend
+# ALMORA --- E-Commerce Platform
 
-> A Java Spring Boot e-commerce backend focused on backend engineering,
-> database optimization, scalable API design, and production-oriented
-> architecture.
+> **Current milestone:** Product Query Engine + Performance
+> Optimization + Database Index Analysis\
+> **Status:** Actively under development\
+> **Development dataset:** 500 products
 
-## Project Overview
+------------------------------------------------------------------------
 
-Almora is an e-commerce platform being evolved step-by-step to learn and
-implement real backend engineering concepts.
+## 📌 About Almora
 
-The project currently provides:
+**Almora** is a full-stack e-commerce platform being developed with a
+production-oriented backend architecture.
 
--   Product CRUD
--   Dynamic product filtering
--   Keyword search
--   Price-range filtering
--   Pagination
--   Dynamic sorting
--   Product reviews and ratings
--   Product images and sizes
--   MySQL persistence
--   MinIO integration direction
--   Performance analysis and optimization roadmap
+The project started with core product and review functionality and is
+now evolving toward a scalable e-commerce system. The current
+engineering focus is on dynamic product querying, pagination, sorting,
+database efficiency, N+1 query elimination, indexing, and measurable
+performance.
 
-## Current Architecture
+### Current technology direction
+
+-   Java
+-   Spring Boot
+-   Spring Data JPA
+-   Hibernate
+-   MySQL
+-   Jakarta Validation
+-   Lombok
+-   JPA Specification / Criteria API
+
+------------------------------------------------------------------------
+
+# 🏗️ Architecture
 
 ``` text
 Client / Frontend
        |
        v
-ProductController
+Controller
        |
        v
-ProductService
+Service Layer
        |
-       v
-ProductSpecification
-(Dynamic Query Engine)
-       |
-       v
-ProductRepository
-       |
-       v
-Hibernate / JPA
-       |
-       v
-MySQL
+       +--------------------+
+       |                    |
+       v                    v
+Specification          Repository
+       |                    |
+       +---------+----------+
+                 |
+                 v
+            JPA/Hibernate
+                 |
+                 v
+               MySQL
 ```
 
-## Technology Stack
+------------------------------------------------------------------------
 
-### Backend
+# 📚 Development Journey
 
--   Java
--   Spring Boot
--   Spring MVC
--   Spring Data JPA
--   Hibernate
--   Jakarta Validation
--   Lombok
+## Phase 1 --- Core Product Management
 
-### Database
+The project began with a conventional product-management backend.
 
--   MySQL
+The `Product` entity currently contains:
 
-### Storage
+-   `id`
+-   `name`
+-   `category`
+-   `subCategory`
+-   `brand`
+-   `sizes`
+-   `color`
+-   `price`
+-   `stock`
+-   `description`
+-   `imageUrls`
+-   `active`
+-   `averageRating`
+-   `reviews`
 
--   MinIO
+Product category is represented by an enum:
 
-### Development
-
--   IntelliJ IDEA
--   Maven
--   Git
--   GitHub
-
-# Completed Features
-
-## Product CRUD
-
-``` text
-POST   /api/products
-GET    /api/products
-GET    /api/products/{id}
-PUT    /api/products/{id}
-DELETE /api/products/{id}
+``` java
+public enum Category {
+    MEN,
+    WOMEN
+}
 ```
 
-Products contain:
+The product controller provides the foundation for:
 
--   Name
--   Category
--   Sub-category
--   Brand
--   Sizes
--   Color
--   Price
--   Stock
--   Description
--   Image URLs
--   Active status
+-   Create
+-   Read
+-   Update
+-   Delete
+-   Product retrieval
+-   Product filtering
+-   Product search
+
+------------------------------------------------------------------------
+
+# Phase 2 --- DTO-Based API Responses
+
+`ProductDTO` was introduced so API responses are separated from the
+persistence entity.
+
+The product response also contains:
+
 -   Average rating
--   Reviews
+-   Review count
 
-## Dynamic Product Query Engine
+This keeps the API response model independent from the JPA entity
+structure.
 
-The Product API now supports:
+------------------------------------------------------------------------
+
+# Phase 3 --- Review System
+
+A review system was implemented and associated with products.
+
+Reviews contain:
+
+-   Product
+-   User
+-   Rating
+-   Comment
+-   Creation timestamp
+
+Initially, product rating information was calculated using individual
+queries:
+
+``` java
+getAverageRating(productId)
+getReviewCount(productId)
+```
+
+This was functionally correct but later became a performance bottleneck
+when products were returned in pages.
+
+------------------------------------------------------------------------
+
+# Phase 4 --- Dynamic Product Query Engine
+
+## Why it was introduced
+
+The original repository contained separate methods such as:
 
 ``` text
-Category
-SubCategory
-Brand
-Color
-Minimum Price
-Maximum Price
-Keyword
-Pagination
-Sorting
+findByCategory(...)
+findByCategoryAndSubCategory(...)
+findByNameContainingIgnoreCase(...)
 ```
 
-Example:
+As filters increased, creating repository methods for every combination
+would become difficult to maintain.
 
-``` http
-GET /api/products?category=MEN&brand=Levis&minPrice=2000&maxPrice=3000&page=0&size=20&sort=price,asc
-```
+The project therefore moved to **Spring Data JPA Specification +
+Criteria API**.
 
-### Query Flow
+## Current filters
+
+`ProductFilterRequest` supports:
 
 ``` text
-HTTP Request
-     |
-ProductFilterRequest
-     |
-ProductSpecification
-     |
-CriteriaBuilder Predicates
-     |
-ProductRepository
-     |
-Hibernate
-     |
-MySQL
+category
+subCategory
+brand
+color
+minPrice
+maxPrice
+keyword
 ```
 
-This allows multiple filters to be combined without creating a separate
-repository method for every combination.
+The dynamic specification is created through:
 
-## Keyword Search
+``` java
+ProductSpecification.filterProducts(request)
+```
 
-Keyword search is implemented against the product name.
+and executed with:
+
+``` java
+repo.findAll(specification, pageable)
+```
+
+### Example
+
+A request containing:
+
+``` text
+category = MEN
+brand = Nike
+minPrice = 1000
+maxPrice = 3000
+```
+
+conceptually produces:
+
+``` sql
+WHERE category = 'MEN'
+AND brand = 'Nike'
+AND price >= 1000
+AND price <= 3000
+```
+
+Only supplied filters are included.
+
+------------------------------------------------------------------------
+
+# Phase 5 --- Keyword Search
+
+Keyword search was implemented using a case-insensitive `LIKE`
+condition.
 
 Conceptually:
 
 ``` sql
-WHERE LOWER(name) LIKE '%keyword%'
+WHERE LOWER(name) LIKE '%jeans%'
 ```
 
-Example:
-
-``` http
-GET /api/products?keyword=jeans&page=0&size=20
-```
-
-## Price Range Filtering
-
-Supports:
+This allows values such as:
 
 ``` text
-minPrice
-maxPrice
+Jeans
+Blue Jeans
+Men's Jeans
+Skinny Jeans
 ```
 
-Example:
+to match.
 
-``` http
-GET /api/products?minPrice=1000&maxPrice=3000
-```
+The current search is focused on product names.
 
-## Pagination
+------------------------------------------------------------------------
+
+# Phase 6 --- Pagination
+
+Pagination was added using Spring Data's `Pageable`.
 
 Example:
 
@@ -185,18 +246,49 @@ Example:
 GET /api/products?page=0&size=20
 ```
 
-The API returns page metadata such as:
+The backend returns:
 
--   Current page
--   Page size
--   Total elements
--   Total pages
--   First/last page information
--   Product content
+``` java
+Page<ProductDTO>
+```
 
-## Dynamic Sorting
+and Hibernate generates database pagination using:
 
-Sorting is handled through Spring Data `Pageable`.
+``` sql
+LIMIT ?, ?
+```
+
+### Why pagination matters
+
+Instead of:
+
+``` text
+All products
+   ↓
+Large DB result
+   ↓
+Large JSON
+   ↓
+Large network response
+```
+
+the application retrieves a manageable page:
+
+``` text
+All products
+   ↓
+20 products
+   ↓
+API response
+```
+
+This provides a foundation for large catalogues.
+
+------------------------------------------------------------------------
+
+# Phase 7 --- Dynamic Sorting
+
+Sorting was integrated through `Pageable`.
 
 Example:
 
@@ -204,96 +296,103 @@ Example:
 GET /api/products?page=0&size=20&sort=price,asc
 ```
 
-Other examples:
+Hibernate generates:
+
+``` sql
+ORDER BY price
+LIMIT ?, ?
+```
+
+An earlier implementation manually reconstructed pagination and
+accidentally lost sorting information. Passing the original `Pageable`
+through the repository fixed this.
+
+The current flow is:
 
 ``` text
-sort=price,desc
-sort=name,asc
-sort=stock,desc
+HTTP sort parameter
+       ↓
+Pageable
+       ↓
+Spring Data JPA
+       ↓
+Hibernate
+       ↓
+ORDER BY
 ```
 
-The Hibernate SQL now generates `ORDER BY` when sorting is requested.
+------------------------------------------------------------------------
 
-# Development Product Dataset
+# Phase 8 --- Development Product Seeder
 
-A development-only `ProductSeeder` was added using:
+The original database contained only a few products, which was enough
+for functional testing but not meaningful for performance analysis.
 
-``` java
-@Component
-@Profile("dev")
-public class ProductSeeder implements CommandLineRunner
-```
-
-The seeder checks the current product count and generates products until
-the database reaches:
+A development-only product seeder was introduced to generate:
 
 ``` text
 500 products
 ```
 
-The generated dataset contains approximately:
+The generated products have randomized:
 
-``` text
-MEN   -> 250
-WOMEN -> 250
-```
-
-The data varies across:
-
--   Categories
--   Sub-categories
--   Brands
--   Colors
--   Prices
--   Stock
+-   Category
+-   Subcategory
+-   Brand
+-   Color
 -   Sizes
+-   Price
+-   Stock
+-   Description
+-   Image URLs
 
-The seeder is restricted to the `dev` profile so development test data
-is not automatically inserted into production.
+The seeder uses:
 
-# Performance Engineering
-
-After completing the Query Engine, performance testing was started using
-the 500-product dataset.
-
-Test request:
-
-``` http
-GET /api/products?page=0&size=20
+``` java
+@Profile("dev")
 ```
 
-The Hibernate logs showed that the main product query itself is not the
-primary bottleneck. Additional database queries are being executed for
-each returned product.
+so development data is isolated from production.
 
-# N+1 Query Problem Identified
+It also runs through Spring Boot startup execution using
+`CommandLineRunner`.
 
-For a page containing 20 products, the current implementation performs
-repeated queries for:
+The seeder checks the existing product count and only creates enough
+products to reach 500.
+
+------------------------------------------------------------------------
+
+# Phase 9 --- Performance Baseline
+
+With 500 products available, a page of approximately 20 products was
+tested.
+
+The initial SQL behavior was approximately:
 
 ``` text
-Image URLs
-Sizes
-Average Rating
-Review Count
+Product query                 1
+Pagination count              1
+Image collection queries      ~20
+Size collection queries       ~20
+Average rating queries        ~20
+Review count queries          ~20
+--------------------------------
+Total                        ~82
 ```
 
-Current baseline:
+This revealed that the primary problem was not simply the product query.
 
-``` text
-20 products
+The DTO conversion was causing repeated database operations.
 
-1  Product query
-1  Count query
-20 Image queries
-20 Size queries
-20 Average-rating queries
-20 Review-count queries
+This became the project's first major performance investigation.
 
-≈ 82 SQL executions
-```
+------------------------------------------------------------------------
 
-The Product service currently calculates rating information per product:
+# Phase 10 --- Review N+1 Query Optimization
+
+## Problem
+
+The original DTO conversion performed:
 
 ``` java
 Double avgRating =
@@ -303,275 +402,791 @@ Long reviewCount =
         reviewService.getReviewCount(product.getId());
 ```
 
-This causes individual aggregate queries for each product.
+for every product.
 
-## Performance Baseline
-
-``` text
-Dataset:
-500 products
-
-Request:
-GET /api/products?page=0&size=20
-
-Page Size:
-20
-
-Approximate SQL Executions:
-82
-```
-
-The purpose of this baseline is to measure the system before
-optimization.
-
-The engineering process is:
+For 20 products this produced approximately:
 
 ``` text
-Measure
-   |
-Identify Bottleneck
-   |
-Optimize
-   |
-Measure Again
-```
-
-# Current Optimization Target
-
-The first optimization target is the review system.
-
-### Current
-
-``` text
-20 products
-   |
-20 AVG queries
+20 average-rating queries
 +
-20 COUNT queries
+20 review-count queries
+=
+40 review queries
 ```
 
-### Target
+This is a classic N+1-style database access problem.
 
-Replace per-product review queries with bulk aggregation using:
+## Solution
+
+A bulk aggregation query was introduced:
 
 ``` sql
-GROUP BY product_id
+SELECT
+    product_id,
+    AVG(rating),
+    COUNT(id)
+FROM reviews
+WHERE product_id IN (...)
+GROUP BY product_id;
 ```
 
-The goal is to retrieve rating information for the whole page with far
-fewer database queries.
-
-After that, image and size collection loading will be optimized.
-
-# Scalability Roadmap
-
-## Phase 1 --- Product Query Engine
+A `ReviewSummaryDTO` was introduced containing:
 
 ``` text
-DONE  Dynamic Filtering
-DONE  Keyword Search
-DONE  Price Range
-DONE  Pagination
-DONE  Sorting
-DONE  Combined Queries
+productId
+averageRating
+reviewCount
 ```
 
-## Phase 2 --- Database Performance
+The service now:
+
+1.  Retrieves the product page.
+2.  Extracts product IDs.
+3.  Executes one review aggregation query.
+4.  Builds a `Map<Long, ReviewSummaryDTO>`.
+5.  Converts products using the already-loaded review summary.
+
+Conceptually:
 
 ``` text
-IN PROGRESS  N+1 Query Detection
-TODO         Bulk Review Aggregation
-TODO         Optimize Image Collection Loading
-TODO         Optimize Size Collection Loading
-TODO         DTO Projections where appropriate
-TODO         Database Indexing
-TODO         Performance comparison
-```
-
-## Phase 3 --- Caching
-
-``` text
-TODO Identify cacheable product queries
-TODO Redis
-TODO Cache-aside pattern
-TODO Cache invalidation
-TODO Measure cache hit/miss performance
-```
-
-## Phase 4 --- Media Storage
-
-``` text
-TODO MinIO integration refinement
-TODO Object storage architecture
-TODO Image upload optimization
-TODO Separate application data from media storage
-```
-
-## Phase 5 --- Async Processing
-
-Potential areas:
-
-``` text
-TODO Background workers
-TODO Event-driven operations
-TODO RabbitMQ / Kafka where justified
-TODO Email processing
-TODO Order processing workflows
-```
-
-## Phase 6 --- Deployment & Infrastructure
-
-Potential areas:
-
-``` text
-TODO Docker
-TODO Reverse Proxy
-TODO Nginx
-TODO Production configuration
-TODO Horizontal scaling
-TODO Monitoring
-TODO Load testing
-```
-
-> Technologies will be introduced when there is a clear engineering
-> reason to use them, rather than only for demonstration.
-
-# Engineering Philosophy
-
-Almora is a learning-oriented backend engineering project.
-
-The objective is not:
-
-``` text
-Add as many technologies as possible.
-```
-
-The objective is:
-
-``` text
-Problem
+Products
    |
-Understand
+   v
+[product IDs]
    |
-Measure
+   v
+ONE bulk review query
    |
-Design
+   v
+ReviewSummary map
    |
-Implement
-   |
-Benchmark
-   |
-Optimize
+   v
+DTO conversion
 ```
 
-For example:
+This reduced approximately 40 review queries to one bulk query.
+
+------------------------------------------------------------------------
+
+# Phase 11 --- Hibernate Batch Fetching
+
+After review optimization, repeated collection loading remained.
+
+The product entity contains:
+
+``` java
+@ElementCollection
+private List<String> sizes;
+```
+
+and:
+
+``` java
+@ElementCollection(fetch = FetchType.EAGER)
+private List<String> imageUrls;
+```
+
+Initially Hibernate repeatedly executed collection queries using:
+
+``` sql
+WHERE product_id = ?
+```
+
+for individual products.
+
+Hibernate batch fetching was introduced using:
+
+``` java
+@BatchSize(size = 20)
+```
+
+for the collections.
+
+Hibernate then generated queries using:
+
+``` sql
+WHERE product_id IN (?, ?, ?, ...)
+```
+
+instead of one collection query per product.
+
+This was applied to:
 
 ``` text
-N+1 Queries
-     |
-Measure SQL executions
-     |
-Bulk aggregation
-     |
-Compare results
+imageUrls
+sizes
 ```
 
-This makes architectural decisions explainable during technical
-interviews and project evaluations.
+### Important concept
 
-# Today's Progress --- 13 August 2026
+`@BatchSize` does not guarantee exactly one query.
 
-Today's work moved Almora from feature development into performance
-engineering.
+It tells Hibernate that multiple pending collection/entity loads can be
+fetched in batches, reducing database round trips.
 
-## Completed Today
+------------------------------------------------------------------------
+
+# Phase 12 --- Performance Result
+
+The same 20-product request evolved approximately as follows:
 
 ``` text
-DONE Completed Dynamic Query Engine
-DONE Verified pagination
-DONE Verified filtering
-DONE Verified keyword search
-DONE Verified price range filtering
-DONE Verified dynamic sorting
-DONE Verified ORDER BY generation
-DONE Added development Product Seeder
-DONE Generated 500 products
-DONE Tested Product API with 20-item pagination
-DONE Started SQL performance analysis
-DONE Identified N+1-style query behavior
-DONE Established initial performance baseline
+Initial implementation
+        ↓
+~82 SQL executions
+        |
+        | Bulk review aggregation
+        v
+~43 SQL executions
+        |
+        | Hibernate batch fetching
+        v
+~5 main SQL operations
 ```
 
-## Current Baseline
+The final structure was approximately:
+
+``` text
+Product query                 1
+Image batch query              1
+Pagination count               1
+Review aggregation             1
+Size batch query               1
+--------------------------------
+Total                          ~5
+```
+
+The exact number can vary depending on the request and Hibernate
+behavior.
+
+The important result is that per-product database operations were
+removed from the product listing path.
+
+------------------------------------------------------------------------
+
+# Phase 13 --- Database `EXPLAIN` Analysis
+
+After reducing unnecessary database round trips, the next phase moved to
+database-level query efficiency.
+
+MySQL `EXPLAIN` was used to understand how queries were executed.
+
+Initially:
+
+``` sql
+EXPLAIN
+SELECT *
+FROM products
+WHERE category = 'MEN'
+AND brand = 'Nike';
+```
+
+returned:
+
+``` text
+type = ALL
+possible_keys = NULL
+key = NULL
+rows = 500
+```
+
+This indicated a full table scan.
+
+The objective became:
+
+``` text
+Application query
+      ↓
+Generated SQL
+      ↓
+EXPLAIN
+      ↓
+Execution plan
+      ↓
+Index decision
+```
+
+------------------------------------------------------------------------
+
+# Phase 14 --- Database Indexes
+
+Indexes were added for important product filters:
+
+``` sql
+CREATE INDEX idx_products_category
+ON products(category);
+```
+
+``` sql
+CREATE INDEX idx_products_brand
+ON products(brand);
+```
+
+``` sql
+CREATE INDEX idx_products_price
+ON products(price);
+```
+
+and a composite index:
+
+``` sql
+CREATE INDEX idx_products_category_brand
+ON products(category, brand);
+```
+
+------------------------------------------------------------------------
+
+# Phase 15 --- Measuring Index Effectiveness
+
+After adding indexes, `EXPLAIN` showed actual index usage.
+
+## Category
+
+Before:
+
+``` text
+type = ALL
+rows = 500
+```
+
+After:
+
+``` text
+type = ref
+key = idx_products_category
+rows = 249
+```
+
+## Brand
+
+Before:
+
+``` text
+type = ALL
+rows = 500
+```
+
+After:
+
+``` text
+type = ref
+key = idx_products_brand
+rows = 80
+```
+
+## Category + Brand
+
+The composite index was selected:
+
+``` text
+type = ref
+key = idx_products_category_brand
+rows = 40
+```
+
+This demonstrated that the composite index was aligned with the tested
+multi-column filter.
+
+------------------------------------------------------------------------
+
+# Important Indexing Lesson
+
+An index being present does **not** mean MySQL must use it.
+
+For:
+
+``` sql
+WHERE price BETWEEN 1000 AND 3000
+```
+
+MySQL still selected a table scan in the current 500-row dataset.
+
+The reason is that a relatively large percentage of the table matched
+the condition, so scanning the small table could be cheaper than using
+the index.
+
+This is why the project uses:
+
+``` text
+EXPLAIN
+```
+
+instead of blindly adding indexes.
+
+------------------------------------------------------------------------
+
+# Phase 16 --- Real Almora Query Engine Verification
+
+The actual API was tested using:
+
+``` http
+GET /api/products?category=MEN&brand=Nike&page=0&size=20&sort=price,asc
+```
+
+Hibernate generated:
+
+``` sql
+SELECT ...
+FROM products
+WHERE category = ?
+AND brand = ?
+ORDER BY price
+LIMIT ?, ?
+```
+
+This verified the complete chain:
+
+``` text
+HTTP Request
+      ↓
+ProductFilterRequest
+      ↓
+ProductSpecification
+      ↓
+Pageable
+      ↓
+ProductRepository
+      ↓
+Hibernate
+      ↓
+MySQL
+```
+
+The request correctly produced:
+
+### Filtering
+
+``` sql
+WHERE category = ?
+AND brand = ?
+```
+
+### Sorting
+
+``` sql
+ORDER BY price
+```
+
+### Pagination
+
+``` sql
+LIMIT ?, ?
+```
+
+The optimized review aggregation and batch collection loading were also
+preserved.
+
+------------------------------------------------------------------------
+
+# 📊 Current System
+
+The current product-listing path is approximately:
+
+``` text
+                    CLIENT
+                      |
+                      v
+              ProductController
+                      |
+                      v
+               ProductService
+                      |
+          +-----------+-----------+
+          |                       |
+          v                       v
+ ProductSpecification          Pageable
+          |                       |
+          +-----------+-----------+
+                      |
+                      v
+              ProductRepository
+                      |
+                      v
+                  Hibernate
+                      |
+                      v
+                    MySQL
+                      |
+       +--------------+--------------+
+       |              |              |
+       v              v              v
+   Filtering       Sorting       Pagination
+       |
+       v
+   Product Page
+       |
+       +-----------+-----------+
+       |           |           |
+       v           v           v
+    Reviews      Images      Sizes
+     Bulk        Batch       Batch
+```
+
+------------------------------------------------------------------------
+
+# 📈 Performance Journey
+
+``` text
+~82 SQL executions
+        |
+        | Review N+1 optimization
+        v
+~43 SQL executions
+        |
+        | @BatchSize
+        v
+~5 main SQL operations
+        |
+        | EXPLAIN
+        v
+Index analysis
+        |
+        v
+Real API verification
+```
+
+------------------------------------------------------------------------
+
+# ✅ Completed So Far
+
+-   [x] Product entity
+-   [x] Product CRUD
+-   [x] Product DTO
+-   [x] Review system
+-   [x] Average rating
+-   [x] Review count
+-   [x] Dynamic product filtering
+-   [x] Category filtering
+-   [x] Subcategory filtering
+-   [x] Brand filtering
+-   [x] Color filtering
+-   [x] Price-range filtering
+-   [x] Keyword search
+-   [x] Pagination
+-   [x] Dynamic sorting
+-   [x] Development profile
+-   [x] 500 development products
+-   [x] Performance baseline
+-   [x] Review N+1 detection
+-   [x] Bulk review aggregation
+-   [x] Image batch fetching
+-   [x] Size batch fetching
+-   [x] Hibernate `@BatchSize`
+-   [x] MySQL `EXPLAIN` analysis
+-   [x] Category index
+-   [x] Brand index
+-   [x] Price index
+-   [x] Category + Brand composite index
+-   [x] Real API filtering + sorting + pagination verification
+
+------------------------------------------------------------------------
+
+# 🔜 Next Planned Work
+
+## 1. Filter + Sort Composite Index Analysis
+
+The real API currently generates:
+
+``` sql
+WHERE category = ?
+AND brand = ?
+ORDER BY price
+LIMIT ?, ?
+```
+
+The next database experiment is to evaluate whether a composite index
+such as:
+
+``` sql
+(category, brand, price)
+```
+
+provides a meaningful advantage for the real filtering + sorting
+pattern.
+
+This will be tested with `EXPLAIN` before being adopted.
+
+------------------------------------------------------------------------
+
+## 2. API Performance Benchmarking
+
+The next stage is to measure actual response performance rather than
+only SQL count.
+
+Planned measurements:
+
+-   Response time
+-   Database execution behavior
+-   Different filter combinations
+-   Different page sizes
+-   Sorting performance
+-   Increasing dataset sizes
+
+------------------------------------------------------------------------
+
+## 3. Larger Dataset Testing
+
+The current development dataset is:
 
 ``` text
 500 products
-20 products/page
-≈ 82 SQL executions
 ```
 
-## Next Session
+Future testing will increase the dataset to evaluate behavior at larger
+scales, potentially:
 
 ``` text
-1. Optimize review aggregation
-2. Reduce AVG + COUNT queries
-3. Re-run the same API request
-4. Compare SQL query count
-5. Optimize image and size loading
-6. Establish a new performance baseline
+5,000
+50,000
+100,000+
 ```
 
-# Current Project Status
+The purpose is to identify where query plans and response times begin to
+degrade.
+
+------------------------------------------------------------------------
+
+## 4. Stable Pagination Response DTO
+
+Spring currently warns when `PageImpl` is serialized directly.
+
+A future improvement will introduce a dedicated pagination response DTO
+rather than exposing Spring's internal `PageImpl` representation
+directly.
+
+Potential structure:
+
+``` json
+{
+  "content": [],
+  "page": 0,
+  "size": 20,
+  "totalElements": 500,
+  "totalPages": 25,
+  "first": true,
+  "last": false
+}
+```
+
+------------------------------------------------------------------------
+
+## 5. Search Optimization
+
+The current keyword search uses:
+
+``` sql
+LOWER(name) LIKE '%keyword%'
+```
+
+This is appropriate for the current stage but may not scale well to very
+large catalogues.
+
+Future possibilities include:
+
+-   MySQL FULLTEXT
+-   Dedicated search infrastructure
+-   Elasticsearch/OpenSearch if justified by scale
+
+No dedicated search engine has been introduced yet.
+
+------------------------------------------------------------------------
+
+## 6. Caching
+
+Redis may be introduced later for data that is frequently requested and
+expensive to compute.
+
+The project intentionally follows:
 
 ``` text
-Product CRUD              ████████████████████ 100%
-Dynamic Query Engine      ████████████████████ 100%
-Pagination                ████████████████████ 100%
-Sorting                   ████████████████████ 100%
-Filtering                 ████████████████████ 100%
-Keyword Search            ████████████████████ 100%
-
-Performance Engineering   ████░░░░░░░░░░░░░░░░ 20%
-N+1 Optimization          ░░░░░░░░░░░░░░░░░░░░ 0%
-Database Indexing          ░░░░░░░░░░░░░░░░░░░░ 0%
-Redis                      ░░░░░░░░░░░░░░░░░░░░ 0%
-Async Processing           ░░░░░░░░░░░░░░░░░░░░ 0%
-Docker/Deployment          ░░░░░░░░░░░░░░░░░░░░ 0%
+Fix inefficient queries
+        ↓
+Optimize database access
+        ↓
+Measure
+        ↓
+Cache when justified
 ```
 
-# Immediate Next Goal
+Redis is therefore a future optimization, not the first response to
+every performance problem.
 
-> Reduce the number of SQL queries generated while returning a paginated
-> product listing.
+------------------------------------------------------------------------
 
-Current:
+## 7. Future E-Commerce Modules
+
+After the product/query foundation is mature, the broader platform
+roadmap includes:
+
+-   Cart
+-   Orders
+-   Checkout
+-   Payments
+-   Authentication/authorization
+-   Inventory management
+-   Frontend product experience
+-   Search
+-   Additional performance optimization
+
+------------------------------------------------------------------------
+
+# 🧠 Engineering Approach
+
+Almora is being developed using an evidence-based optimization cycle:
 
 ``` text
-20 Products
-≈ 82 SQL executions
+1. Build the feature
+       ↓
+2. Observe generated SQL
+       ↓
+3. Measure
+       ↓
+4. Identify bottleneck
+       ↓
+5. Optimize
+       ↓
+6. Measure again
+       ↓
+7. Repeat
 ```
 
-Target:
+Examples already completed:
 
 ``` text
-20 Products
--> significantly fewer SQL executions
+N+1 review queries
+       ↓
+Bulk aggregation
+
+Per-product collection loading
+       ↓
+Hibernate batch fetching
+
+Full table scans
+       ↓
+EXPLAIN + indexes
 ```
 
-The improvement will be measured rather than assumed.
+The goal is not simply to make the application work.
 
-# Project Status
+The goal is to understand the complete path:
 
 ``` text
-Project:          Almora
-Type:             E-Commerce Platform
-Backend:          Java + Spring Boot
-Database:         MySQL
-Current Dataset:  500 development products
-Current Focus:    Backend Performance & Scalability
-AI Integration:   Not currently planned for this phase
+Spring Boot
+    ↓
+Spring Data JPA
+    ↓
+Hibernate
+    ↓
+SQL
+    ↓
+MySQL execution plan
+    ↓
+Performance
 ```
 
-## Development Principle
+------------------------------------------------------------------------
 
-> Build it. Measure it. Find the bottleneck. Fix it. Measure again.
+# 🎯 Current Milestone
+
+## Product Query & Performance Engine
+
+The current Almora backend has moved beyond basic CRUD and now contains:
+
+``` text
+Dynamic filtering
+        +
+Keyword search
+        +
+Price ranges
+        +
+Pagination
+        +
+Sorting
+        +
+Bulk review aggregation
+        +
+Hibernate batch fetching
+        +
+Database indexes
+        +
+EXPLAIN analysis
+        +
+Real API verification
+```
+
+### Current focus
+
+> **Benchmark the real API and optimize the filter + sort database
+> execution plan.**
+
+------------------------------------------------------------------------
+
+# 👨‍💻 Development Status
+
+``` text
+[COMPLETED]
+Core Product CRUD
+        ↓
+[COMPLETED]
+Product DTOs + Reviews
+        ↓
+[COMPLETED]
+Dynamic Query Engine
+        ↓
+[COMPLETED]
+Pagination + Sorting
+        ↓
+[COMPLETED]
+500 Product Dataset
+        ↓
+[COMPLETED]
+Performance Baseline
+        ↓
+[COMPLETED]
+Review N+1 Optimization
+        ↓
+[COMPLETED]
+Collection Batch Fetching
+        ↓
+[COMPLETED]
+Database EXPLAIN Analysis
+        ↓
+[COMPLETED]
+Initial Indexing
+        ↓
+[COMPLETED]
+Real API Query Verification
+        ↓
+[NEXT]
+Filter + Sort Index Analysis
+        ↓
+[NEXT]
+API Benchmarking
+        ↓
+[NEXT]
+Larger Dataset Testing
+        ↓
+[FUTURE]
+Caching / Redis
+        ↓
+[FUTURE]
+Search Optimization
+        ↓
+[FUTURE]
+Cart / Orders / Checkout / Payments
+```
+
+------------------------------------------------------------------------
+
+# ⭐ Project Status
+
+**ALMORA is actively under development.**
+
+The current milestone establishes a scalable foundation for the product
+catalogue by combining:
+
+> **Dynamic querying + pagination + sorting + efficient database
+> access + measurable performance + database execution-plan analysis.**
+
+The next development phase will focus on benchmarking and validating
+performance as the dataset grows.
