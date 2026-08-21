@@ -2,6 +2,7 @@ package almora.almorafinal.Services;
 
 import almora.almorafinal.DTO.ReviewCreateRequest;
 import almora.almorafinal.DTO.ReviewDTO;
+import almora.almorafinal.DTO.ReviewSummaryDTO;
 import almora.almorafinal.Entities.Product;
 import almora.almorafinal.Entities.Review;
 import almora.almorafinal.Entities.User;
@@ -48,7 +49,15 @@ public class ReviewService {
 
 
     }
+//    Adding the Bulk Query Method review Service
+    public List<ReviewSummaryDTO> getReviewSummaries(List<Long> productIds){
+        if(productIds==null || productIds.isEmpty() ){
+            return List.of() ;
 
+        }
+
+        return reviewRepository.getReviewSummaries(productIds) ;
+    }
     public List<ReviewDTO> getReviewsDTO(Long productId){
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));

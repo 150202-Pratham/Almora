@@ -2,6 +2,7 @@ package almora.almorafinal.Services;
 
 import almora.almorafinal.DTO.ProductDTO;
 import almora.almorafinal.DTO.ProductFilterRequest;
+import almora.almorafinal.DTO.ReviewSummaryDTO;
 import almora.almorafinal.Entities.Product;
 import almora.almorafinal.Repository.ProductRepository;
 import almora.almorafinal.specification.ProductSpecification;
@@ -12,7 +13,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +46,33 @@ public class ProductService {
                 .reviewCount(reviewCount)
                 .build();
     }
+
+    private ProductDTO toDTO( Product product, ReviewSummaryDTO reviewSummary ){
+        Double avgRating = 0.0 ;
+        Long reviewCount = 0L ;
+        if( reviewSummary !=null ){
+            avgRating = reviewSummary.getAverageRating();
+            reviewCount = reviewSummary.getReviewCount();
+
+        }
+
+        return ProductDTO.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .category(product.getCategory().toString())
+                .subCategory(product.getSubCategory())
+                .brand(product.getBrand())
+                .sizes(product.getSizes())
+                .color(product.getColor())
+                .price(product.getPrice())
+                .stock(product.getStock())
+                .description(product.getDescription())
+                .imageUrls(product.getImageUrls())
+                .active(product.getActive())
+                .averageRating(avgRating)
+                .reviewCount(reviewCount)
+                .build();
+    }
     public ProductDTO addProduct(Product product) {
         System.out.println(product.getImageUrls()) ;
         Product saved  = repo.save(product) ;
@@ -55,8 +85,25 @@ public class ProductService {
 
     public Page<ProductDTO> getAllProducts(ProductFilterRequest request , Pageable pageable) {
         Specification<Product> spec = ProductSpecification.filterProducts(request) ;
-        return repo.findAll(spec ,pageable)
-                .map(this::toDTO);
+        Page<Product> productPage = repo.findAll(spec,pageable) ;
+
+        List<Long> productIds = productPage.getContent().stream()
+                .map(Product::getId)
+                .toList() ;
+
+        Map<Long,ReviewSummaryDTO> reviewSummaryMap = reviewService.getReviewSummaries(productIds).stream()
+                .collect(Collectors.toMap(
+                        ReviewSummaryDTO::getProductId,
+                        Function.identity()
+                ));
+
+        return productPage.map(
+                product -> toDTO(product,
+                        reviewSummaryMap.get(product.getId())
+                )
+        );
+
+
 
     }
 
