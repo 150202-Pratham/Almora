@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class Product {
     private String brand;
 
     @ElementCollection
+    @BatchSize(size = 20)
     private List<String> sizes; // ["S", "M", "L", "XL"]
 
     private String color;
@@ -49,7 +51,8 @@ public class Product {
     private String description;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> imageUrls; // ["url1", "url2", ...]
+    @BatchSize(size = 20)
+    private List<String> imageUrls;
 
     private Boolean active = true;
 
