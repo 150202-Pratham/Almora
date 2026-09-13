@@ -1,5 +1,6 @@
 package almora.almorafinal.Controller;
 
+import almora.almorafinal.DTO.PageResponse;
 import almora.almorafinal.DTO.ProductDTO;
 import almora.almorafinal.DTO.ProductFilterRequest;
 import almora.almorafinal.Entities.Product;
@@ -31,7 +32,7 @@ public class ProductController {
 
     // ---------- Get All Products ----------
     @GetMapping
-    public ResponseEntity<Page<ProductDTO>> getAllProducts(
+    public ResponseEntity<PageResponse<ProductDTO>> getAllProducts(
             @ModelAttribute ProductFilterRequest request,
             Pageable pageable) {
 

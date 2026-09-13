@@ -1,10 +1,12 @@
 package almora.almorafinal.Services;
 
+import almora.almorafinal.DTO.PageResponse;
 import almora.almorafinal.DTO.ProductDTO;
 import almora.almorafinal.DTO.ProductFilterRequest;
 import almora.almorafinal.DTO.ReviewSummaryDTO;
 import almora.almorafinal.Entities.Product;
 import almora.almorafinal.Repository.ProductRepository;
+import almora.almorafinal.common.exception.ResourceNotFoundException;
 import almora.almorafinal.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -83,7 +85,7 @@ public class ProductService {
 
     }
 
-    public Page<ProductDTO> getAllProducts(ProductFilterRequest request , Pageable pageable) {
+    public PageResponse<ProductDTO> getAllProducts(ProductFilterRequest request , Pageable pageable) {
         Specification<Product> spec = ProductSpecification.filterProducts(request) ;
         Page<Product> productPage = repo.findAll(spec,pageable) ;
 
@@ -97,10 +99,21 @@ public class ProductService {
                         Function.identity()
                 ));
 
-        return productPage.map(
-                product -> toDTO(product,
+        List<ProductDTO> products = productPage.map(
+                product -> toDTO(
+                        product,
                         reviewSummaryMap.get(product.getId())
                 )
+        ).getContent();
+
+        return new PageResponse<>(
+                products,
+                productPage.getNumber(),
+                productPage.getSize(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                productPage.isFirst(),
+                productPage.isLast()
         );
 
 
@@ -109,7 +122,7 @@ public class ProductService {
 
     public ProductDTO getProductById(Long id) {
         Product product = repo.findById(id).
-                orElseThrow(()-> new RuntimeException ("Product Not Found"));
+                orElseThrow(()-> new ResourceNotFoundException("Product Not Found with id="+ id));
         return toDTO(product);
 
     }
@@ -118,7 +131,7 @@ public class ProductService {
 
     public ProductDTO upDateProduct(Long id , Product upDatedProduct){
         Product existProduct  = repo.findById(id)
-                .orElseThrow(()-> new RuntimeException ("Product Not Found"));
+                .orElseThrow(()-> new ResourceNotFoundException("Product Not Found with id="+id));
 
         existProduct.setName(upDatedProduct.getName());
         existProduct.setCategory(upDatedProduct.getCategory());
