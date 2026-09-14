@@ -9,11 +9,13 @@ import almora.almorafinal.Repository.ProductRepository;
 import almora.almorafinal.common.exception.ResourceNotFoundException;
 import almora.almorafinal.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,12 +66,16 @@ public class ProductService {
                 .category(product.getCategory().toString())
                 .subCategory(product.getSubCategory())
                 .brand(product.getBrand())
-                .sizes(product.getSizes())
+                .sizes(product.getSizes() != null
+                        ? new ArrayList<>(product.getSizes())
+                        : new ArrayList<>())
                 .color(product.getColor())
                 .price(product.getPrice())
                 .stock(product.getStock())
                 .description(product.getDescription())
-                .imageUrls(product.getImageUrls())
+                .imageUrls(product.getImageUrls() != null
+                        ? new ArrayList<>(product.getImageUrls())
+                        : new ArrayList<>())
                 .active(product.getActive())
                 .averageRating(avgRating)
                 .reviewCount(reviewCount)
@@ -85,6 +91,9 @@ public class ProductService {
 
     }
 
+    @Cacheable( value = "products",
+            key = "#request.toString() + '-' + #pageable.toString()"
+    )
     public PageResponse<ProductDTO> getAllProducts(ProductFilterRequest request , Pageable pageable) {
         Specification<Product> spec = ProductSpecification.filterProducts(request) ;
         Page<Product> productPage = repo.findAll(spec,pageable) ;

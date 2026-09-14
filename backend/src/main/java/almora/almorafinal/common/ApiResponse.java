@@ -1,4 +1,4 @@
-package almora.almorafinal.common.response;
+package almora.almorafinal.common;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
