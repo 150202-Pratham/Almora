@@ -9,6 +9,7 @@ import almora.almorafinal.Repository.ProductRepository;
 import almora.almorafinal.common.exception.ResourceNotFoundException;
 import almora.almorafinal.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -81,10 +82,11 @@ public class ProductService {
                 .reviewCount(reviewCount)
                 .build();
     }
+
+    @CacheEvict(value = "products" , allEntries = true)
     public ProductDTO addProduct(Product product) {
         System.out.println(product.getImageUrls()) ;
         Product saved  = repo.save(product) ;
-
 
         return toDTO(saved);
 
@@ -137,7 +139,7 @@ public class ProductService {
     }
 
     
-
+    @CacheEvict(value = "products" , allEntries = true)
     public ProductDTO upDateProduct(Long id , Product upDatedProduct){
         Product existProduct  = repo.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Product Not Found with id="+id));
@@ -159,6 +161,8 @@ public class ProductService {
         return toDTO(existProduct) ;
 
     }
+
+    @CacheEvict(value = "products" , allEntries = true)
     public void delete(Long id) {
         repo.deleteById(id);
     }
